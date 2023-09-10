@@ -1,0 +1,118 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+}
+
+.game-header {
+  display: flex;
+  justify-content: center;
+  margin-top: 3%;
+}
+
+.game-header h1 {
+  text-align: center;
+  padding: 8px 0;
+  font-size: 36px;
+  margin-bottom: 0;
+  border-bottom: 2px solid black;
+}
+
+.game-input-div {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 15px;
+  margin: auto;
+}
+
+.game-input-section {
+  display: flex;
+  justify-content: center;
+}
+
+.user-input {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgb(201, 199, 199);
+  outline-color: purple;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+#loader {
+  background-size: 25%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url("./assets/loading.gif");
+  height: 90px;
+}
+
+.wrong {
+  background-color: rgb(134, 34, 34);
+  color: white;
+}
+
+.correct {
+  background-color: rgb(20, 96, 30);
+  color: white;
+}
+
+.warning {
+  background-color: orangered;
+}
+
+.win {
+  animation: rainbow 4s infinite linear;
+}
+
+.visible {
+  opacity: 1;
+}
+
+.invisible {
+  opacity: 0;
+}
+
+@keyframes rainbow {
+  0% {
+    border-color: blueviolet;
+    color: blueviolet;
+  }
+  14% {
+    border-color: indigo;
+    color: indigo;
+  }
+  28% {
+    border-color: royalblue;
+    color: royalblue;
+  }
+  42% {
+    border-color: aqua;
+    color: aqua;
+  }
+  57% {
+    border-color: lime;
+    color: lime;
+  }
+  71% {
+    border-color: yellow;
+    color: yellow;
+  }
+  85% {
+    border-color: orange;
+    color: orange;
+  }
+  100% {
+    border-color: red;
+    color: red;
+  }
+}
+
+.about {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+
+}
