@@ -1,118 +1,151 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+
+  color: #333;
   margin: 0;
-  font-family: sans-serif;
+  padding: 0;
 }
 
-.game-header {
-  display: flex;
-  justify-content: center;
-  margin-top: 3%;
-}
-
-.game-header h1 {
+.navbar {
+  border-bottom: 2px solid #333;
+  padding: 15px;
   text-align: center;
-  padding: 8px 0;
-  font-size: 36px;
   margin-bottom: 0;
-  border-bottom: 2px solid black;
 }
 
-.game-input-div {
+.brand {
+  font-size: 30px;
+}
+
+.scoreboard {
+  max-width: 295px;
+  width: 100%;
+  margin: 10px auto;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-gap: 15px;
-  margin: auto;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  row-gap: 10px;
+  column-gap: 5px;
 }
 
-.game-input-section {
-  display: flex;
-  justify-content: center;
-}
-
-.user-input {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgb(201, 199, 199);
-  outline-color: purple;
-  text-align: center;
-  font-size: 24px;
-  font-weight: 700;
-  cursor: pointer;
+.scoreboard-letter {
+  height: 45px;
+  width: 45px;
+  font-size: 30px;
   text-transform: uppercase;
-}
-
-#loader {
-  background-size: 25%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-image: url("./assets/loading.gif");
-  height: 90px;
-}
-
-.wrong {
-  background-color: rgb(134, 34, 34);
-  color: white;
+  border: 3px solid #ccc;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .correct {
-  background-color: rgb(20, 96, 30);
+  background-color: darkgreen;
   color: white;
 }
 
-.warning {
-  background-color: orangered;
+.close {
+  background-color: goldenrod;
+  color: white;
 }
 
-.win {
-  animation: rainbow 4s infinite linear;
+.wrong {
+  background-color: #888;
+  color: white;
 }
 
-.visible {
-  opacity: 1;
+.invalid {
+  animation: flash 1s;
 }
 
-.invisible {
-  opacity: 0;
+/* flashes red border and then fades back to gray */
+@keyframes flash {
+  5% {
+    border-color: crimson;
+  }
+
+  100% {
+    border-color: #ccc;
+  }
 }
+
+.spiral {
+  font-size: 40px;
+  animation: spin 1.5s linear infinite;
+}
+
+/* rotates clockwise indefinitely */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* visibility hidden means the item is still there and taking up space
+   but just not shown. display: none doesn't take up space */
+.hidden {
+  visibility: hidden;
+}
+
+.info-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* winner animation */
 
 @keyframes rainbow {
+  100%,
   0% {
-    border-color: blueviolet;
-    color: blueviolet;
+    color: rgb(255, 0, 0);
   }
-  14% {
-    border-color: indigo;
-    color: indigo;
+  8% {
+    color: rgb(255, 127, 0);
   }
-  28% {
-    border-color: royalblue;
-    color: royalblue;
+  16% {
+    color: rgb(255, 255, 0);
   }
-  42% {
-    border-color: aqua;
-    color: aqua;
+  25% {
+    color: rgb(127, 255, 0);
   }
-  57% {
-    border-color: lime;
-    color: lime;
+  33% {
+    color: rgb(0, 255, 0);
   }
-  71% {
-    border-color: yellow;
-    color: yellow;
+  41% {
+    color: rgb(0, 255, 127);
   }
-  85% {
-    border-color: orange;
-    color: orange;
+  50% {
+    color: rgb(0, 255, 255);
   }
-  100% {
-    border-color: red;
-    color: red;
+  58% {
+    color: rgb(0, 127, 255);
   }
+  66% {
+    color: rgb(0, 0, 255);
+  }
+  75% {
+    color: rgb(127, 0, 255);
+  }
+  83% {
+    color: rgb(255, 0, 255);
+  }
+  91% {
+    color: rgb(255, 0, 127);
+  }
+}
+
+.winner {
+  animation: rainbow 4s infinite linear;
 }
 
 .about {
   position: absolute;
   top: 10px;
   left: 10px;
-
 }

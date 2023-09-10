@@ -1,168 +1,158 @@
-const ANSWER_URL = "https://words.dev-apis.com/word-of-the-day";
-const VALIDATE_URL = "https://words.dev-apis.com/validate-word";
-const loader = document.getElementById("loader");
-const inputs = document.getElementsByClassName("user-input");
-const heading = document.querySelector(".game-header h1");
-const inputContainer = document.querySelector(".game-input-div");
-const inputValue = [];
-let row = 0;
-let todayWord = null;
-let wordBreakUp = {};
-let input;
+const ANSWER_LENGTH = 5;
+const ROUNDS = 6;
+const letters = document.querySelectorAll(".scoreboard-letter");
+const loadingDiv = document.querySelector(".info-bar");
 
-function showLoader() {
-  loader.classList.remove("invisible");
-  loader.classList.add("visible");
-}
+// I like to do an init function so I can use "await"
+async function init() {
+  // the state for the app
+  let currentRow = 0;
+  let currentGuess = "";
+  let done = false;
+  let isLoading = true;
 
-function hideLoader() {
-  loader.classList.add("invisible");
-  loader.classList.remove("visible");
-}
+  // word of the day
+  const res = await fetch("https://words.dev-apis.com/word-of-the-day");
+  const {word: wordRes} = await res.json();
+  const word = wordRes.toUpperCase();
+  const wordParts = word.split("");
+  isLoading = false;
+  setLoading(isLoading);
 
-async function fetchInitialData() {
-  showLoader();
-  const response = await fetch(ANSWER_URL);
-  data = await response.json();
-  if (!data) {
-    hideLoader();
-    return;
-  }
-  todayWord = data?.word;
-  todayWord?.split("")?.forEach(element => {
-    if (wordBreakUp[element]) {
-      wordBreakUp[element] = wordBreakUp[element] + 1;
+  // user adds a letter to the current guess
+  function addLetter(letter) {
+    if (currentGuess.length < ANSWER_LENGTH) {
+      currentGuess += letter;
     } else {
-      wordBreakUp[element] = 1;
+      current = currentGuess.substring(0, currentGuess.length - 1) + letter;
     }
-  });
-  hideLoader();
-}
 
-async function isValidWord(word) {
-  showLoader();
-  const response = await fetch(VALIDATE_URL, {
-    method: "POST",
-    body: JSON.stringify({word}),
-  });
-  data = await response.json();
-  if (!data) {
-    hideLoader();
-    return;
+    letters[currentRow * ANSWER_LENGTH + currentGuess.length - 1].innerText =
+      letter;
   }
-  const isValid = data?.validWord;
-  switch (isValid) {
-    case true:
-      if (word === todayWord.toLowerCase()) {
-        handleWin();
-      } else {
-        handleRetry();
-      }
-      break;
-    case false:
-      if (row === 5) {
-        handleLose();
-      } else {
-        handleWrong();
-      }
-      break;
-  }
-}
 
-function handleRetry() {
-  let i;
-  for (i = row * 5; i < 5 + row * 5; i++) {
-    const value = inputs[i].value;
-
-    if (todayWord.includes(value) && wordBreakUp[value] > 0) {
-      wordBreakUp = {
-        ...wordBreakUp,
-        [value]: --wordBreakUp[value],
-      };
-      if (i === todayWord.split("").findIndex(e => e === value)) {
-        inputs[i].classList.add("correct");
-      } else {
-        inputs[i].classList.add("warning");
-      }
-    } else {
-      inputs[i].classList.add("wrong");
+  // use tries to enter a guess
+  async function commit() {
+    if (currentGuess.length !== ANSWER_LENGTH) {
+      // do nothing
+      return;
     }
-  }
-  hideLoader();
-  inputs[i].focus();
-  row++;
-}
 
-function handleLose() {
-  for (let i = 0; i < inputs.length; i++) {
-    inputs[i].classList.add("wrong");
-  }
-  hideLoader();
-  alert("You lost the game!!");
-  row++;
-}
-
-function handleWrong() {
-  let i;
-  for (i = row * 5; i < 5 + row * 5; i++) {
-    inputs[i].classList.add("wrong");
-  }
-  inputs[i].focus();
-  hideLoader();
-  row++;
-  alert("Invalid word");
-}
-
-function handleWin() {
-  for (let i = row * 5; i < 5 + row * 5; i++) {
-    inputs[i].classList.add("correct");
-  }
-  hideLoader();
-  heading.classList.add("win");
-  heading.innerText = "Wow! You are really a word master";
-  alert("You win the game!!");
-}
-
-function isValidKey(value) {
-  const regEx = /^[a-zA-z]$/;
-  return regEx.test(value);
-}
-
-function placeInputs() {
-  for (let i = 0; i < 30; i++) {
-    let input = document.createElement("input");
-    input.classList.add("user-input");
-    inputContainer.appendChild(input);
-  }
-}
-
-function init() {
-  placeInputs();
-  fetchInitialData();
-  for (let i = 0; i < inputs.length; i++) {
-    inputs[i].addEventListener("keyup", function (e) {
-      if (e.key === "Backspace") {
-        if (row > 5) return;
-        e.target.value = "";
-        if (i === 0) return;
-        else {
-          inputs[i - 1].focus();
-        }
-      } else if (e.key === "Enter" && (i + 1) % 5 === 0) {
-        let word = "";
-        for (let i = row * 5; i < 5 + row * 5; i++) {
-          word = word + inputs[i].value;
-        }
-        isValidWord(word.toLowerCase());
-      } else if (isValidKey(e.target.value)) {
-        if (e.target.value.length > 0 && row === Math.floor((i + 1) / 5)) {
-          if (inputs.length <= i + 1) return;
-          inputs[i + 1].focus();
-        }
-      } else {
-        e.target.value = "";
-      }
+    // check the API to see if it's a valid word
+    isLoading = true;
+    setLoading(isLoading);
+    const res = await fetch("https://words.dev-apis.com/validate-word", {
+      method: "POST",
+      body: JSON.stringify({word: currentGuess}),
     });
+    const {validWord} = await res.json();
+    isLoading = false;
+    setLoading(isLoading);
+
+    // not valid, mark the word as invalid and return
+    if (!validWord) {
+      markInvalidWord();
+      return;
+    }
+
+    const guessParts = currentGuess.split("");
+    const map = makeMap(wordParts);
+    let allRight = true;
+
+    // first pass just finds correct letters so we can mark those as correct first
+    for (let i = 0; i < ANSWER_LENGTH; i++) {
+      if (guessParts[i] === wordParts[i]) {
+        // mark as correct
+        letters[currentRow * ANSWER_LENGTH + i].classList.add("correct");
+        map[guessParts[i]]--;
+      }
+    }
+
+    // second pass finds close and wrong letters
+    for (let i = 0; i < ANSWER_LENGTH; i++) {
+      if (guessParts[i] === wordParts[i]) {
+        // do nothing
+      } else if (map[guessParts[i]] && map[guessParts[i]] > 0) {
+        // mark as close
+        allRight = false;
+        letters[currentRow * ANSWER_LENGTH + i].classList.add("close");
+        map[guessParts[i]]--;
+      } else {
+        // wrong
+        allRight = false;
+        letters[currentRow * ANSWER_LENGTH + i].classList.add("wrong");
+      }
+    }
+
+    currentRow++;
+    currentGuess = "";
+    if (allRight) {
+      // win
+      alert("you win");
+      document.querySelector(".brand").classList.add("winner");
+      done = true;
+    } else if (currentRow === ROUNDS) {
+      // lose
+      alert(`you lose, the word was ${word}`);
+      done = true;
+    }
   }
+
+  // user hits backspace, if the the length of the string is 0 then do nothing
+  function backspace() {
+    currentGuess = currentGuess.substring(0, currentGuess.length - 1);
+    letters[currentRow * ANSWER_LENGTH + currentGuess.length].innerText = "";
+  }
+
+  function markInvalidWord() {
+    for (let i = 0; i < ANSWER_LENGTH; i++) {
+      letters[currentRow * ANSWER_LENGTH + i].classList.remove("invalid");
+
+      setTimeout(
+        () => letters[currentRow * ANSWER_LENGTH + i].classList.add("invalid"),
+        10
+      );
+    }
+  }
+
+  // listen on keydown so we can catch Enter and Backspace
+  document.addEventListener("keydown", function handleKeyPress(event) {
+    if (done || isLoading) return; //do nothing
+
+    const action = event.key;
+
+    if (action === "Enter") {
+      commit();
+    } else if (action === "Backspace") {
+      backspace();
+    } else if (isLetter(action)) {
+      addLetter(action.toUpperCase());
+    } else {
+      // do nothing
+    }
+  });
 }
+
+function isLetter(letter) {
+  return /^[a-zA-Z]$/.test(letter);
+}
+
+// show the loading spinner when needed
+function setLoading(isLoading) {
+  loadingDiv.classList.toggle("hidden", !isLoading);
+}
+
+// count letters
+function makeMap(array) {
+  const obj = {};
+  for (let i = 0; i < array.length; i++) {
+    if (obj[array[i]]) {
+      obj[array[i]]++;
+    } else {
+      obj[array[i]] = 1;
+    }
+  }
+  return obj;
+}
+
 init();
