@@ -1,4 +1,4 @@
-# word-master
+# WORD MASTER
 ## How to play?
 
 #### There is a secret five-letter word chosen
